@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Gateway - Devia Yulistriani</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-dark: #0a0a0a;
+            --card-dark: #1a1a1a;
+            --card-border: #333;
+            --text-light: #f0f0f0;
+            --text-gray: #aaa;
+            --dana-green: #00a854;
+            --gopay-blue: #00aaee;
+            --qris-orange: #ff6b35;
+            --whatsapp-green: #25D366;
+            --telegram-blue: #0088cc;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--primary-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(28, 28, 28, 0.8) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(28, 28, 28, 0.8) 0%, transparent 20%);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--dana-green), var(--gopay-blue), var(--qris-orange));
+        }
+        
+        .logo {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .title {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #f0f0f0, #aaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+        
+        .subtitle {
+            color: var(--text-gray);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .payment-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .payment-card {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+            border-radius: 18px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .payment-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+        
+        .payment-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+        }
+        
+        .dana-card::before {
+            background: linear-gradient(to bottom, var(--dana-green), #007a3d);
+        }
+        
+        .gopay-card::before {
+            background: linear-gradient(to bottom, var(--gopay-blue), #0066cc);
+        }
+        
+        .qris-card::before {
+            background: linear-gradient(to bottom, var(--qris-orange), #e55a2b);
+        }
+        
+        .payment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .payment-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 18px;
+            font-size: 30px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dana-icon {
+            background: linear-gradient(135deg, var(--dana-green), #008a45);
+        }
+        
+        .gopay-icon {
+            background: linear-gradient(135deg, var(--gopay-blue), #0088cc);
+        }
+        
+        .qris-icon {
+            background: linear-gradient(135deg, var(--qris-orange), #ff8c5a);
+        }
+        
+        .payment-name {
+            font-size: 1.7rem;
+            font-weight: 800;
+        }
+        
+        .payment-details {
+            margin-top: 20px;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            color: var(--text-gray);
+            font-weight: 600;
+            min-width: 130px;
+        }
+        
+        .detail-value {
+            font-weight: 700;
+            color: var(--text-light);
+            text-align: right;
+            word-break: break-all;
+            flex: 1;
+            font-size: 1.1rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .copy-btn {
+            flex: 1;
+            background-color: #222;
+            color: var(--text-light);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1rem;
+        }
+        
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+        
+        .dana-copy-btn {
+            background: linear-gradient(135deg, var(--dana-green), #008a45);
+            color: white;
+        }
+        
+        .dana-copy-btn:hover {
+            background: linear-gradient(135deg, #008a45, #007a3d);
+        }
+        
+        .gopay-copy-btn {
+            background: linear-gradient(135deg, var(--gopay-blue), #0088cc);
+            color: white;
+        }
+        
+        .gopay-copy-btn:hover {
+            background: linear-gradient(135deg, #0088cc, #0077bb);
+        }
+        
+        .chat-owner-btn {
+            background: linear-gradient(135deg, var(--telegram-blue), #006699);
+            color: white;
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .chat-owner-btn:hover {
+            background: linear-gradient(135deg, #006699, #005588);
+        }
+        
+        .qris-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 25px;
+        }
+        
+        .qris-image-container {
+            width: 220px;
+            height: 220px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 3px solid var(--card-border);
+            cursor: pointer;
+            transition: all 0.4s ease;
+            margin-bottom: 20px;
+            position: relative;
+            background-color: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .qris-image-container:hover {
+            transform: scale(1.08);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
+            border-color: var(--qris-orange);
+        }
+        
+        .qris-image-container::after {
+            content: 'Klik untuk memperbesar';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .qris-image-container:hover::after {
+            opacity: 1;
+        }
+        
+        .qris-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .qris-zoom-btn {
+            background: linear-gradient(135deg, var(--qris-orange), #ff8c5a);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 28px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.2);
+        }
+        
+        .qris-zoom-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+            background: linear-gradient(135deg, #ff8c5a, var(--qris-orange));
+        }
+        
+        .qris-zoom-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Modal untuk QRIS zoom */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: var(--card-dark);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 90vw;
+            max-height: 90vh;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--qris-orange);
+            animation: modalAppear 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+        
+        .modal-close {
+            background: #333;
+            color: var(--text-light);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        
+        .modal-close:hover {
+            background: #ff4444;
+            transform: rotate(90deg);
+        }
+        
+        .modal-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-height: 70vh;
+        }
+        
+        .modal-image {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Konfirmasi Transfer Section */
+        .confirmation-section {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .confirmation-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        
+        .confirmation-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--telegram-blue), #006699);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 32px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 136, 204, 0.3);
+        }
+        
+        .confirmation-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--telegram-blue), #006699);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .confirmation-description {
+            color: var(--text-gray);
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            line-height: 1.7;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .confirmation-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 35px;
+        }
+        
+        .confirmation-step {
+            background: rgba(40, 40, 40, 0.8);
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 4px solid var(--telegram-blue);
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: var(--telegram-blue);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-light);
+        }
+        
+        .step-description {
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+        
+        .chat-owner-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .owner-info {
+            background: rgba(40, 40, 40, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid var(--card-border);
+        }
+        
+        .owner-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .owner-item:last-child {
+            border-bottom: none;
+        }
+        
+        .owner-label {
+            color: var(--text-gray);
+            font-weight: 600;
+        }
+        
+        .owner-value {
+            font-weight: 700;
+            color: var(--text-light);
+            text-align: right;
+        }
+        
+        .telegram-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, var(--telegram-blue), #006699);
+            color: white;
+            text-decoration: none;
+            padding: 18px 40px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 136, 204, 0.3);
+        }
+        
+        .telegram-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 136, 204, 0.4);
+        }
+        
+        .telegram-link:active {
+            transform: translateY(-2px);
+        }
+        
+        /* WhatsApp Channel Section */
+        .channel-section {
+            background: linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .channel-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        
+        .channel-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--whatsapp-green), #128C7E);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 32px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+        }
+        
+        .channel-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--whatsapp-green), #128C7E);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .channel-description {
+            color: var(--text-gray);
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            line-height: 1.7;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .channel-link {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--whatsapp-green), #128C7E);
+            color: white;
+            text-decoration: none;
+            padding: 18px 40px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+        }
+        
+        .channel-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(37, 211, 102, 0.4);
+        }
+        
+        .channel-link:active {
+            transform: translateY(-2px);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: #666;
+            font-size: 1rem;
+            width: 100%;
+            border-top: 1px solid #222;
+            margin-top: 20px;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            background: linear-gradient(135deg, #222, #333);
+            color: var(--text-light);
+            padding: 18px 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 3000;
+            transform: translateX(400px);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-left: 5px solid var(--dana-green);
+            max-width: 350px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification-icon {
+            font-size: 1.5rem;
+            color: var(--dana-green);
+        }
+        
+        .notification-text {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #333;
+            border-top: 5px solid var(--qris-orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 900px) {
+            .payment-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .confirmation-steps {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header, .payment-card, .confirmation-section, .channel-section {
+                padding: 20px;
+            }
+            
+            .title {
+                font-size: 1.8rem;
+            }
+            
+            .payment-name {
+                font-size: 1.5rem;
+            }
+            
+            .qris-image-container {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                margin-top: 20px;
+            }
+            
+            .title {
+                font-size: 1.6rem;
+            }
+            
+            .payment-icon, .channel-icon, .confirmation-icon {
+                width: 55px;
+                height: 55px;
+                font-size: 26px;
+            }
+            
+            .channel-link, .telegram-link {
+                padding: 15px 30px;
+                font-size: 1.2rem;
+            }
+            
+            .qris-image-container {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .notification {
+                max-width: 90%;
+                right: 5%;
+                left: 5%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <h1 class="title">Payment Gateway</h1>
+            <p class="subtitle">Silahkan lakukan pembayaran melalui salah satu metode di bawah. Pastikan untuk mencantumkan nama Anda saat transfer.</p>
+        </header>
+        
+        <!-- Payment Methods Section -->
+        <div class="payment-section">
+            <!-- DANA Card -->
+            <div class="payment-card dana-card">
+                <div class="payment-header">
+                    <div class="payment-icon dana-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <h2 class="payment-name">DANA</h2>
+                </div>
+                <div class="payment-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Nomor:</span>
+                        <div class="detail-value">085722037878</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Atas Nama:</span>
+                        <div class="detail-value">DEVIA YULISTRIANI</div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="copy-btn dana-copy-btn" data-text="085722037878">
+                        <i class="fas fa-copy"></i> Salin Nomor
+                    </button>
+                    <button class="copy-btn dana-copy-btn" data-text="DEVIA YULISTRIANI">
+                        <i class="fas fa-user"></i> Salin Nama
+                    </button>
+                </div>
+                <button class="copy-btn chat-owner-btn" id="danaChatBtn">
+                    <i class="fab fa-telegram"></i> Chat Owner Setelah TF
+                </button>
+            </div>
+            
+            <!-- GOPAY Card -->
+            <div class="payment-card gopay-card">
+                <div class="payment-header">
+                    <div class="payment-icon gopay-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h2 class="payment-name">GOPAY</h2>
+                </div>
+                <div class="payment-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Nomor:</span>
+                        <div class="detail-value">085722037878</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Atas Nama:</span>
+                        <div class="detail-value">DEVIA YULISTRIANI</div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="copy-btn gopay-copy-btn" data-text="085722037878">
+                        <i class="fas fa-copy"></i> Salin Nomor
+                    </button>
+                    <button class="copy-btn gopay-copy-btn" data-text="DEVIA YULISTRIANI">
+                        <i class="fas fa-user"></i> Salin Nama
+                    </button>
+                </div>
+                <button class="copy-btn chat-owner-btn" id="gopayChatBtn">
+                    <i class="fab fa-telegram"></i> Chat Owner Setelah TF
+                </button>
+            </div>
+            
+            <!-- QRIS Card -->
+            <div class="payment-card qris-card">
+                <div class="payment-header">
+                    <div class="payment-icon qris-icon">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <h2 class="payment-name">QRIS ALL PAY</h2>
+                </div>
+                <div class="payment-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Jenis:</span>
+                        <div class="detail-value">QRIS (Semua E-Wallet)</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Atas Nama:</span>
+                        <div class="detail-value">DEVIA YULISTRIANI</div>
+                    </div>
+                </div>
+                <div class="qris-container">
+                    <div class="qris-image-container" id="qrisImage">
+                        <img src="https://files.catbox.moe/9x3b2f.jpeg" alt="QRIS Payment" class="qris-image" id="qrisPreview">
+                    </div>
+                    <button class="qris-zoom-btn" id="zoomQrisBtn">
+                        <i class="fas fa-search-plus"></i> Perbesar QR Code
+                    </button>
+                </div>
+                <button class="copy-btn chat-owner-btn" id="qrisChatBtn" style="margin-top: 20px;">
+                    <i class="fab fa-telegram"></i> Chat Owner Setelah TF
+                </button>
+            </div>
+        </div>
+        
+        <!-- Confirmation Transfer Section -->
+        <div class="confirmation-section">
+            <div class="confirmation-header">
+                <div class="confirmation-icon">
+                    <i class="fab fa-telegram"></i>
+                </div>
+                <h2 class="confirmation-title">Konfirmasi Transfer</h2>
+            </div>
+            <p class="confirmation-description">
+                Setelah melakukan transfer melalui metode pembayaran di atas, harap konfirmasikan kepada owner dengan mengikuti langkah-langkah berikut:
+            </p>
+            
+            <div class="confirmation-steps">
+                <div class="confirmation-step">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">Transfer Dana</h3>
+                    <p class="step-description">Lakukan transfer sesuai jumlah yang ditentukan ke salah satu metode pembayaran yang tersedia.</p>
+                </div>
+                
+                <div class="confirmation-step">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">Screenshot Bukti</h3>
+                    <p class="step-description">Ambil screenshot bukti transfer yang berhasil dari aplikasi e-wallet atau bank Anda.</p>
+                </div>
+                
+                <div class="confirmation-step">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">Hubungi Owner</h3>
+                    <p class="step-description">Klik tombol "Chat Owner" di bawah untuk mengirim bukti transfer dan konfirmasi.</p>
+                </div>
+            </div>
+            
+            <div class="chat-owner-section">
+                <div class="owner-info">
+                    <div class="owner-item">
+                        <span class="owner-label">Platform:</span>
+                        <span class="owner-value">Telegram</span>
+                    </div>
+                    <div class="owner-item">
+                        <span class="owner-label">Username:</span>
+                        <span class="owner-value">@ArgaXmagic</span>
+                    </div>
+                    <div class="owner-item">
+                        <span class="owner-label">Nama:</span>
+                        <span class="owner-value">Arga</span>
+                    </div>
+                </div>
+                
+                <a href="https://t.me/ArgaXmagic" target="_blank" class="telegram-link" id="telegramLink">
+                    <i class="fab fa-telegram"></i> Chat Owner via Telegram
+                </a>
+                
+                <p style="color: var(--text-gray); margin-top: 10px; font-size: 0.9rem;">
+                    Klik tombol di atas untuk langsung terhubung dengan owner di Telegram
+                </p>
+            </div>
+        </div>
+        
+        <!-- WhatsApp Channel Section -->
+        <div class="channel-section">
+            <div class="channel-header">
+                <div class="channel-icon">
+                    <i class="fab fa-whatsapp"></i>
+                </div>
+                <h2 class="channel-title">Saluran WhatsApp</h2>
+            </div>
+            <p class="channel-description">
+                Bergabunglah dengan saluran WhatsApp kami untuk mendapatkan informasi terbaru, promosi eksklusif, dan update langsung dari kami. Dapatkan notifikasi instant tentang layanan kami.
+            </p>
+            <a href="https://whatsapp.com/channel/0029Vb6t455AzNboCiQ39Q0a" target="_blank" class="channel-link">
+                <i class="fab fa-whatsapp"></i> Bergabung Sekarang
+            </a>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <p>© 2023 Devia Yulistriani. Semua hak dilindungi. | Payment Gateway v2.0</p>
+    </footer>
+    
+    <!-- Modal untuk QRIS zoom -->
+    <div class="modal-overlay" id="qrisModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">QRIS ALL PAY - Devia Yulistriani</h3>
+                <button class="modal-close" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-image-container">
+                <img src="https://files.catbox.moe/9x3b2f.jpeg" alt="QRIS Payment - Full Size" class="modal-image" id="modalImage">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle notification-icon"></i>
+        <span class="notification-text">Teks berhasil disalin!</span>
+    </div>
+    
+    <script>
+        // Inisialisasi variabel global
+        let isModalOpen = false;
+        
+        // Fungsi untuk menyalin teks ke clipboard dengan fallback
+        function copyToClipboard(text) {
+            // Fallback untuk browser yang tidak support clipboard API
+            const fallbackCopy = () => {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        showNotification('Berhasil disalin: ' + (text.length > 20 ? text.substring(0, 20) + '...' : text));
+                    } else {
+                        showNotification('Gagal menyalin teks');
+                    }
+                } catch (err) {
+                    console.error('Fallback copy error: ', err);
+                    showNotification('Gagal menyalin teks');
+                }
+                
+                document.body.removeChild(textArea);
+            };
+            
+            // Coba menggunakan Clipboard API modern
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        showNotification('Berhasil disalin: ' + (text.length > 20 ? text.substring(0, 20) + '...' : text));
+                    })
+                    .catch(err => {
+                        console.error('Clipboard API error: ', err);
+                        // Fallback ke metode lama
+                        fallbackCopy();
+                    });
+            } else {
+                // Gunakan fallback untuk browser lama
+                fallbackCopy();
+            }
+        }
+        
+        // Fungsi untuk menampilkan notifikasi
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationText = notification.querySelector('.notification-text');
+            
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            // Hapus notifikasi setelah 3 detik
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Fungsi untuk membuka modal QRIS
+        function openQrisModal() {
+            if (isModalOpen) return;
+            
+            const modal = document.getElementById('qrisModal');
+            const modalImage = document.getElementById('modalImage');
+            
+            // Tambah loading state
+            modalImage.style.opacity = '0.5';
+            
+            // Pastikan gambar dimuat sebelum menampilkan modal
+            const img = new Image();
+            img.onload = function() {
+                modalImage.style.opacity = '1';
+                modal.classList.add('active');
+                isModalOpen = true;
+                document.body.style.overflow = 'hidden'; // Mencegah scroll
+            };
+            
+            img.onerror = function() {
+                // Jika gambar gagal dimuat, gunakan placeholder
+                modalImage.src = 'https://via.placeholder.com/500x500/333/fff?text=QRIS+ALL+PAY\nScan+untuk+bayar';
+                modalImage.style.opacity = '1';
+                modal.classList.add('active');
+                isModalOpen = true;
+                document.body.style.overflow = 'hidden';
+                showNotification('Gambar QRIS menggunakan placeholder');
+            };
+            
+            img.src = 'https://files.catbox.moe/9x3b2f.jpeg';
+        }
+        
+        // Fungsi untuk menutup modal QRIS
+        function closeQrisModal() {
+            if (!isModalOpen) return;
+            
+            const modal = document.getElementById('qrisModal');
+            modal.classList.remove('active');
+            isModalOpen = false;
+            document.body.style.overflow = 'auto'; // Aktifkan scroll kembali
+        }
+        
+        // Fungsi untuk chat owner dengan pesan konfirmasi
+        function openOwnerChat(paymentMethod) {
+            const methodNames = {
+                'dana': 'DANA',
+                'gopay': 'GOPAY',
+                'qris': 'QRIS'
+            };
+            
+            const methodName = methodNames[paymentMethod] || 'Transfer';
+            
+            // Pesan yang akan dikirim ke Telegram
+            const message = `Halo @ArgaXmagic, saya sudah melakukan transfer via ${methodName}.\n\n` +
+                           `Nama: [SILAHKAN ISI NAMA ANDA]\n` +
+                           `Jumlah: [SILAHKAN ISI JUMLAH TRANSFER]\n` +
+                           `Metode: ${methodName}\n` +
+                           `Tanggal: ${new Date().toLocaleDateString('id-ID')}\n\n` +
+                           `Bukti transfer sudah saya lampirkan. Terima kasih!`;
+            
+            // Encode pesan untuk URL
+            const encodedMessage = encodeURIComponent(message);
+            
+            // Buka Telegram dengan pesan
+            const telegramUrl = `https://t.me/ArgaXmagic?text=${encodedMessage}`;
+            
+            // Buka di tab baru
+            window.open(telegramUrl, '_blank');
+            
+            // Tampilkan notifikasi
+            showNotification(`Membuka chat dengan owner untuk konfirmasi ${methodName}`);
+        }
+        
+        // Event listener saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup tombol salin untuk semua metode pembayaran
+            const copyButtons = document.querySelectorAll('.copy-btn:not(.chat-owner-btn)');
+            
+            copyButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const textToCopy = this.getAttribute('data-text');
+                    copyToClipboard(textToCopy);
+                    
+                    // Efek visual saat diklik
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+            
+            // Setup QRIS zoom functionality
+            const qrisImage = document.getElementById('qrisImage');
+            const zoomQrisBtn = document.getElementById('zoomQrisBtn');
+            const closeModalBtn = document.getElementById('closeModal');
+            const modalOverlay = document.getElementById('qrisModal');
+            
+            // Buka modal saat gambar QRIS diklik
+            qrisImage.addEventListener('click', openQrisModal);
+            
+            // Buka modal saat tombol zoom diklik
+            zoomQrisBtn.addEventListener('click', openQrisModal);
+            
+            // Tutup modal saat tombol close diklik
+            closeModalBtn.addEventListener('click', closeQrisModal);
+            
+            // Tutup modal saat area luar modal diklik
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) {
+                    closeQrisModal();
+                }
+            });
+            
+            // Setup tombol chat owner
+            const danaChatBtn = document.getElementById('danaChatBtn');
+            const gopayChatBtn = document.getElementById('gopayChatBtn');
+            const qrisChatBtn = document.getElementById('qrisChatBtn');
+            const telegramLink = document.getElementById('telegramLink');
+            
+             // Tambah event listener untuk tombol chat owner
+            danaChatBtn.addEventListener('click', () => openOwnerChat('dana'));
+            gopayChatBtn.addEventListener('click', () => openOwnerChat('gopay'));
+            qrisChatBtn.addEventListener('click', () => openOwnerChat('qris'));
+            
+            // Tambah pesan default untuk link Telegram langsung
+            telegramLink.addEventListener('click', function(e) {
+                const message = "Halo @ArgaXmagic, saya sudah melakukan transfer dan ingin konfirmasi.";
+                const encodedMessage = encodeURIComponent(message);
+                this.href = `https://t.me/ArgaXmagic?text=${encodedMessage}`;
+            });
+            
+            // Tutup modal dengan tombol ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && isModalOpen) {
+                    closeQrisModal();
+                }
+            });
+            
+            // Preload gambar QRIS untuk performa lebih baik
+            const qrisPreview = document.getElementById('qrisPreview');
+            const modalImage = document.getElementById('modalImage');
+            
+            // Pastikan gambar QRIS dimuat dengan benar
+            qrisPreview.onerror = function() {
+                this.src = 'https://via.placeholder.com/220x220/333/fff?text=QRIS+Image\nGagal+memuat+gambar';
+                showNotification('Gambar QRIS gagal dimuat');
+            };
+            
+            modalImage.onerror = function() {
+                this.src = 'https://via.placeholder.com/500x500/333/fff?text=QRIS+ALL+PAY\nScan+untuk+bayar';
+            };
+            
+            // Animasi untuk elemen saat halaman dimuat
+            const sections = document.querySelectorAll('.payment-card, .confirmation-section, .channel-section');
+            sections.forEach((section, index) => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    section.style.opacity = '1';
+                    section.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+            
+            // Efek hover yang lebih smooth
+            const paymentCards = document.querySelectorAll('.payment-card');
+            paymentCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.zIndex = '10';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.zIndex = '1';
+                });
+            });
+        });
+        
+        // Fallback jika gambar QRIS gagal dimuat
+        window.addEventListener('load', function() {
+            const qrisImg = document.getElementById('qrisPreview');
+            const modalImg = document.getElementById('modalImage');
+            
+            // Cek jika gambar gagal dimuat
+            setTimeout(() => {
+                if (qrisImg.naturalWidth === 0) {
+                    qrisImg.src = 'https://via.placeholder.com/220x220/333/fff?text=QRIS+ALL+PAY\nScan+dengan+e-wallet';
+                }
+                
+                if (modalImg.naturalWidth === 0) {
+                    modalImg.src = 'https://via.placeholder.com/500x500/333/fff?text=QRIS+ALL+PAY\nScan+untuk+bayar+ke+Devia+Yulistriani';
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
+```
